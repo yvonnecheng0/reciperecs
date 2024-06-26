@@ -1,34 +1,45 @@
-from flask import Flask, request
-from flask import render_template, redirect, url_for
+from flask import Flask, request, redirect, url_for, render_template
 import db
 from recipe import get_recipes
 
 app = Flask(__name__)
 
-#Render home page with form to enter ingredients 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return '''
+    <h1>Recipe Finder</h1>
+    <form action="/submit" method="post">
+        <label for="ingredients">Enter your ingredients (comma-separated):</label>
+        <input type="text" name="ingredients" id="ingredients" required>
+        <button type="submit">Find Recipes</button>
+    </form>
+    <a href="/stored_recipes">View Stored Recipes</a>
+    '''
 
-#Handle submission form, save ingredients to database,
-#fetch top 5 recipes, and return results
 @app.route('/submit', methods=['POST'])
 def submit():
-    ingredients = request.form.getlist('ingredients[]')
+    ingredients = request.form.get('ingredients').split(',')
+    ingredients = [ingredient.strip() for ingredient in ingredients]
     for ingredient in ingredients:
-        db.get_ingredients()
+        db.add_ingredient(ingredient)
     recipes = get_recipes(ingredients)
+    
     for recipe in recipes:
-        db.add_recipe(recipe['id'], recipe['title'], recipe['image'])
-    return render_template('results.html', recipes=recipes)
+        name = recipe['title']
+        url = recipe['sourceUrl']
+        db.save_recipe(name, url)
 
-#Redirect GET requests for /submit to home page
+    return redirect(url_for('stored_recipes'))
+
+@app.route('/stored_recipes')
+def stored_recipes():
+    recipes = db.get_stored_recipes()
+    return render_template('stored_recipes.html', recipes=recipes)
+
 @app.route('/submit', methods=['GET'])
 def handle_get_submit():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    #Initialize database and run Flask app in debug mode
     db.create_database()
     app.run(debug=True)
-
