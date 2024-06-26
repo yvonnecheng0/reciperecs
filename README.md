@@ -10,7 +10,6 @@ helping to reduce food waste and simplify meal planning.
 - [Installation](#installation)
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
-- [License](#license)
 
 ## Overview
 
@@ -86,7 +85,3 @@ the full recipes.
 - Spoonacular API
 - HTML/CSS
 
-## License
-
-This project is licensed under the MIT License. See the
-[LICENSE](LICENSE) file for details.
