@@ -18,6 +18,8 @@ def submit():
     for ingredient in ingredients:
         db.get_ingredients()
     recipes = get_recipes(ingredients)
+    for recipe in recipes:
+        db.add_recipe(recipe['id'], recipe['title'], recipe['image'])
     return render_template('results.html', recipes=recipes)
 
 #Redirect GET requests for /submit to home page
