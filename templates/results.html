@@ -34,8 +34,18 @@
     <h1>Recipe Suggestions</h1>
     <ul>
         {% for recipe in recipes %}
-            <li>{{ recipe.title }} - <a href="{{ recipe.sourceUrl }}" target="_blank">View Recipe</a></li>
+            <li>
+                <strong>{{ recipe.title }}</strong> - 
+                <a href="{{ recipe.url }}" target="_blank">View Recipe</a>
+                <br>
+                <em>Ingredients:</em> {{ recipe.ingredients | join(', ') }}
+            </li>
         {% endfor %}
     </ul>
-    <a h
+    <a href="/">Go Back</a>
+</body>
+</html>
+
+
+
 
