@@ -18,22 +18,19 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    ingredients = request.form.get('ingredients').split(',')
-    ingredients = [ingredient.strip() for ingredient in ingredients]
-    for ingredient in ingredients:
-        db.add_ingredient(ingredient)
-    recipes = get_recipes(ingredients)
-    
+    query = request.form['query']
+    recipes = get_recipes(query)
+    conn = get_db_connection()
     for recipe in recipes:
-        name = recipe['title']
-        url = recipe['sourceUrl']
-        db.save_recipe(name, url)
-
-    return redirect(url_for('stored_recipes'))
+        save_recipe(conn, recipe)
+    conn.close()
+    return redirect(url_for('stored_recipes', recipes=recipes))
 
 @app.route('/stored_recipes')
 def stored_recipes():
-    recipes = db.get_stored_recipes()
+    conn = get_db_connection()
+    recipes = get_stored_recipes(conn)
+    conn.close()
     return render_template('stored_recipes.html', recipes=recipes)
 
 @app.route('/submit', methods=['GET'])
