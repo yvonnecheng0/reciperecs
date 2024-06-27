@@ -4,6 +4,7 @@ from recipe import get_recipes
 import secrets
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)  
 
 #Make home page with form to enter ingredients
 @app.route('/')
