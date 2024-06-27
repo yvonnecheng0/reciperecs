@@ -9,10 +9,7 @@ def create_database():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL
         )
-    ''')
-    conn.commit()
-    conn.close()
-    
+    ''')    
     c.execute('''
         CREATE TABLE IF NOT EXISTS recipes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,6 +17,8 @@ def create_database():
             title TEXT NOT NULL,
         )
     ''')
+    conn.commit()
+    conn.close()
 #Save a list of ingredients to database
 def get_ingredients():
     conn = sqlite3.connect('ingredients.db')
@@ -36,20 +35,18 @@ def add_ingredient(name):
     conn.commit()
     conn.close()
     
-def save_recipe(name, url):
-    conn = sqlite3.connect('ingredients.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO recipes (name, url) VALUES (?, ?)', (name, url))
+def save_recipe(conn, recipe):
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO recipes (recipe_id, title) VALUES (?, ?)", (recipe['id'], recipe['title']))
+    for ingredient in recipe['ingredients']:
+        cursor.execute("INSERT INTO ingredients (recipe_id, name) VALUES (?, ?)", (recipe['id'], ingredient))
     conn.commit()
-    conn.close()
+    
+def get_stored_recipes(conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT recipe_id, title FROM recipes")
+    return cursor.fetchall()
 
-def get_stored_recipes():
-    conn = sqlite3.connect('ingredients.db')
-    c = conn.cursor()
-    c.execute('SELECT name, url FROM recipes')
-    recipes = c.fetchall()
-    conn.close()
-    return recipes
     
 create_database()
 
