@@ -6,13 +6,11 @@ import secrets
 
 app = Flask(__name__)
 
-#Render home page with form to enter ingredients 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-#Handle submission form, save ingredients to database,
-#fetch top 5 recipes, and return results
+
 @app.route('/submit', methods=['POST'])
 def submit():
     ingredients = request.form.getlist('ingredients[]')
@@ -37,12 +35,28 @@ def clear():
     return redirect(url_for('index'))
 
 #Redirect GET requests for /submit to home page
+    ingredients = request.form.get('ingredients').split(',')
+    ingredients = [ingredient.strip() for ingredient in ingredients]
+    for ingredient in ingredients:
+        db.add_ingredient(ingredient)
+    recipes = get_recipes(ingredients)
+    
+    for recipe in recipes:
+        name = recipe['title']
+        url = recipe['sourceUrl']
+        db.save_recipe(name, url)
+
+    return redirect(url_for('stored_recipes'))
+
+@app.route('/stored_recipes')
+def stored_recipes():
+    recipes = db.get_stored_recipes()
+    return render_template('stored_recipes.html', recipes=recipes)
+
 @app.route('/submit', methods=['GET'])
 def handle_get_submit():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    #Initialize database and run Flask app in debug mode
     db.create_database()
     app.run(debug=True)
-
