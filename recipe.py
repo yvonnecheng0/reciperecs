@@ -30,7 +30,7 @@ def get_recipes(ingredients):
                 db_recipe_id = db.add_recipe(title, url)
                 for ingredient in ingredients:
                     ingredient_id = db.add_ingredient(ingredient)
-                    db.add_recipe_ingredient(db_recipe_id, ingredient_id)
+                    db.add_recipe_ingred(db_recipe_id, ingredient_id)
 
     return recipes
 

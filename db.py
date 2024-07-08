@@ -22,7 +22,7 @@ def create_database():
     ''')
 
     c.execute('''
-        CREATE TABLE IF NOT EXISTS recipe_ingredients (
+        CREATE TABLE IF NOT EXISTS recipe_ingred (
             recipe_id INTEGER,
             ingredient_id INTEGER,
             FOREIGN KEY (recipe_id) REFERENCES recipes(id),
@@ -71,7 +71,7 @@ def add_recipe_ingredient(recipe_id, ingredient_id):
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
     c.execute('''
-        INSERT OR IGNORE INTO recipe_ingredients (recipe_id, ingredient_id)
+        INSERT OR IGNORE INTO recipe_ingred (recipe_id, ingredient_id)
         VALUES (?, ?)
     ''', (recipe_id, ingredient_id))    conn.commit()
     conn.close()
@@ -98,12 +98,19 @@ def get_recipes_with_ingredients():
             GROUP_CONCAT(DISTINCT ingredients.name)
         FROM
             recipes
-            JOIN recipe_ingredients ON recipes.id = recipe_ingredients.recipe_id
-            JOIN ingredients ON recipe_ingredients.ingredient_id = ingredients.id
+            JOIN recipe_ingred ON recipes.id = recipe_ingred.recipe_id
+            JOIN ingredients ON recipe_ingred.ingredient_id = ingredients.id
         GROUP BY
             recipes.id
     ''')
-    recipes = [{'title': row[0], 'url': row[1], 'ingredients': row[2].split(',')} for row in c.fetchall()]
+    recipes = [
+        {
+            'title': row[0],
+            'url': row[1],
+            'ingredients': row[2].split(',')
+        }
+        for row in c.fetchall()
+    ]
     conn.close()
     return recipes
 
@@ -112,7 +119,7 @@ def get_recipes_with_ingredients():
 def clear_database():
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-    c.execute('DELETE FROM recipe_ingredients')
+    c.execute('DELETE FROM recipe_ingred')
     c.execute('DELETE FROM recipes')
     c.execute('DELETE FROM ingredients')
     conn.commit()

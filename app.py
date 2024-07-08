@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 import db
 from recipe import get_recipes
 import secrets
-import git 
+import git
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)  # Ensure this is a secure key
@@ -35,21 +35,19 @@ def results():
     return render_template('results.html', recipes=recipes)
 
 
-<<<<<<< HEAD
 # Clear all data from database
-=======
 @app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':
-        repo = git.Repo('/home/CHANGE_TO_PYTHON_ANYWHERE_USERNAME/CHANGE_TO_GITHUB_REPO_NAME')
+        repo = git.Repo('/home/CHANGE_TO_PYTHON_ANYWHERE_USERNAME/REPO_NAME')
         origin = repo.remotes.origin
         origin.pull()
         return 'Updated PythonAnywhere successfully', 200
     else:
         return 'Wrong event type', 400
+# Clear all data from database
 
-#Clear all data from database
->>>>>>> 4159384061cdd1d2e91b881acbacb5ae9b6155d9
+
 @app.route('/clear', methods=['POST'])
 def clear():
     db.clear_database()
