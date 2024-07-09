@@ -19,13 +19,12 @@ def index():
 @app.route('/submit', methods=['POST'])
 def submit():
     ingredients = request.form.getlist('ingredients[]')
-
     if not ingredients or all(not ing.strip() for ing in ingredients):
         flash('Please enter at least one ingredient.')
         return redirect(url_for('index'))
 
     recipes = get_recipes(ingredients)
-    return redirect(url_for('results'))
+    return render_template('results.html', recipes=recipes)
 
 
 # Render results page with saved recipes and ingredients
