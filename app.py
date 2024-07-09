@@ -35,11 +35,22 @@ def results():
     return render_template('results.html', recipes=recipes)
 
 
+@app.route('/past_recipes')
+def past_recipes():
+    recipes = db.get_recipes_with_nutrition()
+    return render_template('past_recipes.html', recipes=recipes)
+
+@app.route('/history')
+def history():
+    recipes = db.get_recipes_with_nutrition()
+    return render_template('history.html', recipes=recipes)
+
+
 # Clear all data from database
 @app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':
-        repo = git.Repo('/home/CHANGE_TO_PYTHON_ANYWHERE_USERNAME/REPO_NAME')
+        repo = git.Repo('/home/ANYWHERE_USERNAME/REPO_NAME')
         origin = repo.remotes.origin
         origin.pull()
         return 'Updated PythonAnywhere successfully', 200
@@ -62,5 +73,5 @@ def handle_get_submit():
 
 
 if __name__ == '__main__':
-    db.create_database()  # Initialize the database
-    app.run(debug=True)  # Run the Flask app in debug mode
+    db.create_database()  
+    app.run(debug=True)  

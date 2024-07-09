@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe History</title>
+    <!-- Your CSS styles here -->
+</head>
+<body>
+    <h1>Recipe History</h1>
+    <ul>
+        <!-- Display saved recipes with nutrition information -->
+        {% for recipe in recipes %}
+            <li>
+                <strong>{{ recipe.title }}</strong> -
+                <a href="{{ recipe.url }}" target="_blank">View Recipe</a>
+                <br>
+                <em>Ingredients:</em> {{ recipe.ingredients | join(', ') }}
+                <br>
+                <em>Nutrition:</em>
+                <ul>
+                    {% for nutrient in recipe.nutrients %}
+                        <li>{{ nutrient.name }}: {{ nutrient.amount }} {{ nutrient.unit }} ({{ nutrient.percentOfDailyNeeds }}% daily needs)</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/results">Go Back to Results</a>
+    <a href="/">Go Back to Home</a>
+</body>
+</html>
