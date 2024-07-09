@@ -30,6 +30,16 @@ def create_database():
             UNIQUE (recipe_id, ingredient_id)
         )
     ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS nutrition (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        recipe_id INTEGER,
+        name TEXT,
+        amount REAL, 
+        unit TEXT, 
+        percent_of_daily_needs REAL
+        )
+    ''')
 
     conn.commit()
     conn.close()

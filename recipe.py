@@ -48,3 +48,11 @@ def get_recipe_info(recipe_id):
     if response.status_code == 200:
         return response.json()
     return None
+
+def get_nutrition_info(recipe_id):
+    response = requests.get(SPOONACULAR_API_URL.format(id=recipe_id), params={'apiKey': SPOONACULAR_API_KEY})
+    return response.json()
+
+def save_recipe_with_nutrition(recipe):
+    conn = sqlite3.connect('ingredients.db')
+    c = conn.cursor()
