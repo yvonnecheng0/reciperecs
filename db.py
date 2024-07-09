@@ -1,10 +1,9 @@
 import sqlite3
 
-
 def create_database():
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-
+    
     c.execute('''
         CREATE TABLE IF NOT EXISTS ingredients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,31 +21,31 @@ def create_database():
     ''')
 
     c.execute('''
-        CREATE TABLE IF NOT EXISTS recipe_ingred (
+        CREATE TABLE IF NOT EXISTS recipe_ingredients (
             recipe_id INTEGER,
             ingredient_id INTEGER,
             FOREIGN KEY (recipe_id) REFERENCES recipes(id),
             FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
             UNIQUE (recipe_id, ingredient_id)
+            
         )
     ''')
+
     c.execute('''
-        CREATE TABLE IF NOT EXISTS nutrition (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            recipe_id INTEGER,
+        CREATE TABLE IF NOT EXISTS nutrient_info (
             name TEXT,
             amount REAL,
             unit TEXT,
-            percent_of_daily_needs REAL,
-            FOREIGN KEY (recipe_id) REFERENCES recipes(id)
+            percentOfDailyNeeds REAL,
+            ingredient_id INTEGER,
+            FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
+            UNIQUE (ingredient_id)
         )
     ''')
-
     conn.commit()
     conn.close()
 
-
-# Add one ingredient to ingredients table or retrieve its ID if it exists
+#Add one ingredient to ingredients table or retrieve ID if it exists
 def add_ingredient(name):
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
@@ -57,40 +56,26 @@ def add_ingredient(name):
     conn.close()
     return ingredient_id
 
-
-# Add one recipe to the recipes table or retrieve its ID if it exists
+#Add one recipe to recipes table or retrieve ID if it exists
 def add_recipe(title, url):
-    """
-    Add a single recipe to the recipes table or retrieve its ID if it exists.
-    """
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-    c.execute('''
-        INSERT OR IGNORE INTO recipes (title, url)
-        VALUES (?, ?)
-     ''', (title, url))
-    c.execute('''
-        SELECT id FROM recipes WHERE title = ? AND url = ?
-    ''', (title, url))
+    c.execute('INSERT OR IGNORE INTO recipes (title, url) VALUES (?, ?)', (title, url))
+    c.execute('SELECT id FROM recipes WHERE title = ? AND url = ?', (title, url))
     recipe_id = c.fetchone()[0]
     conn.commit()
     conn.close()
     return recipe_id
 
-
-# Associate an ingredient with a recipe in the recipe_ingredients table
+#Associate an ingredient with a recipe in the recipe_ingredients table
 def add_recipe_ingred(recipe_id, ingredient_id):
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-    c.execute('''
-        INSERT OR IGNORE INTO recipe_ingred (recipe_id, ingredient_id)
-        VALUES (?, ?)
-    ''', (recipe_id, ingredient_id))
+    c.execute('INSERT OR IGNORE INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (?, ?)', (recipe_id, ingredient_id))
     conn.commit()
     conn.close()
 
-
-# Get all ingredients from the ingredients table
+#Get all ingredients from the ingredients table
 def get_ingredients():
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
@@ -99,95 +84,68 @@ def get_ingredients():
     conn.close()
     return ingredients
 
-
-# Get all recipes along with their associated ingredients
+#Get all recipes along with their associated ingredients
 def get_recipes_with_ingredients():
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
     c.execute('''
-        SELECT
-            recipes.title,
-            recipes.url,
-            GROUP_CONCAT(DISTINCT ingredients.name)
-        FROM
-            recipes
-            JOIN recipe_ingred ON recipes.id = recipe_ingred.recipe_id
-            JOIN ingredients ON recipe_ingred.ingredient_id = ingredients.id
-        GROUP BY
-            recipes.id
+        SELECT recipes.title, recipes.url, GROUP_CONCAT(DISTINCT ingredients.name)
+        FROM recipes
+        JOIN recipe_ingredients ON recipes.id = recipe_ingredients.recipe_id
+        JOIN ingredients ON recipe_ingredients.ingredient_id = ingredients.id
+        GROUP BY recipes.id
     ''')
-    recipes = [
-        {
-            'title': row[0],
-            'url': row[1],
-            'ingredients': row[2].split(',')
-        }
-        for row in c.fetchall()
-    ]
+    recipes = [{'title': row[0], 'url': row[1], 'ingredients': row[2].split(',')} for row in c.fetchall()]
     conn.close()
     return recipes
 
 
-def save_nutrition_info(recipe_id, nutrition_info):
+def add_nutrient_info(name, amount, unit, percent_of_daily_needs, ingredient_id):
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-    for nutrient in nutrition_info.get('nutrients', []):
-        c.execute('''
-            INSERT INTO nutrition (
-                recipe_id, name, amount, unit, percent_of_daily_needs
-            )
-            VALUES (?, ?, ?, ?, ?)
-        ''', (
-            recipe_id, nutrient['name'], nutrient['amount'], 
-            nutrient['unit'], nutrient.get('percentOfDailyNeeds', 0)
-        ))
+    
+    c.execute('''
+        INSERT INTO nutrient_info (name, amount, unit, percentOfDailyNeeds, ingredient_id)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (name, amount, unit, percent_of_daily_needs, ingredient_id))
+    
     conn.commit()
     conn.close()
 
-# Get all recipes along with their associated ingredients and nutrition info
-def get_recipes_with_nutrition():
+
+def get_ingredients_with_nutrients():
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
+    
     c.execute('''
-        SELECT
-            r.id, r.title, r.url, 
-            GROUP_CONCAT(DISTINCT i.name), 
-            n.name, n.amount, n.unit, n.percent_of_daily_needs
-        FROM
-            recipes r
-        JOIN recipe_ingred ri ON r.id = ri.recipe_id
-        JOIN ingredients i ON ri.ingredient_id = i.id
-        LEFT JOIN nutrition n ON r.id = n.recipe_id
-        GROUP BY r.id, n.name
+        SELECT ingredients.name, nutrient_info.name, nutrient_info.amount, nutrient_info.unit, nutrient_info.percentOfDailyNeeds
+        FROM ingredients
+        LEFT JOIN nutrient_info ON ingredients.id = nutrient_info.ingredient_id
     ''')
-
-    recipes = {}
+    
+    ingredients = []
     for row in c.fetchall():
-        recipe_id, title, url, ingredients, nutrient_name, \
-            amount, unit, percent_of_daily_needs = row
-        if recipe_id not in recipes:
-            recipes[recipe_id] = {
-                'title': title,
-                'url': url,
-                'ingredients': ingredients.split(','),
-                'nutrition': []
-            }
-        recipes[recipe_id]['nutrition'].append({
-            'name': nutrient_name,
-            'amount': amount,
-            'unit': unit,
-            'percent_of_daily_needs': percent_of_daily_needs
+        ingredients.append({
+            'ingredient_name': row[0],
+            'nutrient_name': row[1],
+            'amount': row[2],
+            'unit': row[3],
+            'percent_of_daily_needs': row[4]
         })
+    
     conn.close()
-    return recipes
+    return ingredients
 
-# Clear all data from database
+
+#Clear all data from the database
 def clear_database():
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-    c.execute('DELETE FROM recipe_ingred')
+    c.execute('DELETE FROM recipe_ingredients')
     c.execute('DELETE FROM recipes')
     c.execute('DELETE FROM ingredients')
-    c.execute('DELETE FROM nutrition')
     conn.commit()
     conn.close()
+
+# Initialize the database by creating the tables.
+create_database()
