@@ -24,7 +24,7 @@ def submit():
     for ingredient in ingredients:
         if ingredient.strip():
             db.add_ingredient(ingredient.strip())
-    recipes = recipe.new_get_recipes(ingredients)
+    recipes = recipe.get_recipes(ingredients)
     return render_template('results.html', recipes=recipes)
 
 

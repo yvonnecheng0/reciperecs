@@ -71,7 +71,7 @@ def get_recipe_info(recipe_id):
         print(f"Failed to fetch recipe info for recipe ID {recipe_id}. Status code: {response.status_code}")
         return None
 
-def new_get_recipes(ingredients):
+'''def new_get_recipes(ingredients):
     params = {
         'ingredients': ','.join(ingredients),
         'number': 5,
@@ -107,4 +107,4 @@ def new_get_recipes(ingredients):
             ingredient_id = db.add_ingredient(ingredient)
             db.add_recipe_ingred(db_recipe_id, ingredient_id)
 
-    return detailed_recipes
+    return detailed_recipes'''
