@@ -6,35 +6,79 @@
     <title>Recipe Recommendation System</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center-aligns all children in the column */
+            min-height: 100vh; /* Ensures full viewport height */
+        }
+        nav {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: #4CAF50;
+        }
+        nav a {
+            text-decoration: none;
+            color: white;
+            padding: 10px 15px;
+            margin: 0 10px;
+            background: #4CAF50;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        nav a:hover {
+            background-color: #367c39;
+            color: #ddd;
         }
         h1 {
-            color: #333;
+            color: #2c3e50;
+            text-align: center;
+            margin: 20px 0;
         }
         .error {
             color: red;
             margin-bottom: 10px;
+            text-align: center;
         }
         form {
+            width: 100%;
+            max-width: 600px; /* Limits form width */
             margin-top: 20px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centers form content */
         }
-        input[type="text"] {
-            padding: 10px;
-            width: 300px;
-            margin-bottom: 10px;
+        input[type="text"], input[type="submit"], button {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            transition: all 0.3s;
+            width: 100%; /* Ensures full width within the form */
         }
         input[type="submit"], button {
-            padding: 10px 20px;
             background-color: #5cb85c;
             color: white;
-            border: none;
             cursor: pointer;
+            margin-top: 10px;
         }
         input[type="submit"]:hover, button:hover {
             background-color: #4cae4c;
+        }
+        button {
+            background-color: #23455c;
+        }
+        button:hover {
+            background-color: #4b8fbc;
         }
     </style>
 </head>
@@ -42,7 +86,7 @@
     <nav>
         <a href="/">Home</a> |
         <a href="/history">History</a> |
-        <a href="/nutrition">Nutrition</a> <!-- Added missing pipe and Nutrition link -->
+        <a href="/nutrition">Nutrition</a>
     </nav>
     <h1>Enter Your Ingredients</h1>
     {% with messages = get_flashed_messages() %}
@@ -58,7 +102,7 @@
         <div id="ingredients-container">
             <input type="text" name="ingredients[]" placeholder="Enter an ingredient"><br><br>
         </div>
-        <button type="button" onclick="addIngredientField()">Add More Ingredients</button><br><br>
+        <button type="button" onclick="addIngredientField()">Add More Ingredients</button><br>
         <input type="submit" value="Find Recipes">
     </form>
     <form action="/clear" method="post" style="margin-top: 20px;">

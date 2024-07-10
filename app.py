@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 import db
-from recipe import get_recipes
+import recipe
 import secrets
 import git
 
@@ -17,12 +17,16 @@ def index():
 @app.route('/submit', methods=['POST'])
 def submit():
     ingredients = request.form.getlist('ingredients[]')
-    if not ingredients or all(not ing.strip() for ing in ingredients):
+    if not ingredients or all(ing.strip() == "" for ing in ingredients):
         flash('Please enter at least one ingredient.')
         return redirect(url_for('index'))
 
-    recipes = get_recipes(ingredients)
-    return redirect(url_for('results'))
+    for ingredient in ingredients:
+        if ingredient.strip():
+            db.add_ingredient(ingredient.strip())
+    recipes = recipe.new_get_recipes(ingredients)
+    return render_template('results.html', recipes=recipes)
+
 
 # Render results page with saved recipes and ingredients
 @app.route('/results')
@@ -40,7 +44,7 @@ def nutrition():
     recipes = db.get_recipes_with_nutrition()
     return render_template('nutrition.html', recipes=recipes)
 
-# Clear all data from database
+''' # Clear all data from database
 @app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':
@@ -50,7 +54,7 @@ def webhook():
         return 'Updated PythonAnywhere successfully', 200
     else:
         return 'Wrong event type', 400
-
+'''
 # Clear all data from database
 @app.route('/clear', methods=['POST'])
 def clear():

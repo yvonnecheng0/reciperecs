@@ -2,10 +2,10 @@ import requests
 import db
 import os
 
-API_KEY = os.getenv('API_KEY')
+API_KEY = '3c09da1dea074fc8ac5379a421e5ffec'
 SEARCH_URL = 'https://api.spoonacular.com/recipes/complexSearch'
 RECIPE_INFO_URL = 'https://api.spoonacular.com/recipes/{id}/information'
-
+FIND_BY_INGREDIENTS_URL = 'https://api.spoonacular.com/recipes/findByIngredients'
 # Get recipes from Spoonacular API based on input
 # Input: list of ingredients
 # Output: list of 5 recipes matching ingredients
@@ -15,6 +15,7 @@ def get_recipes(ingredients):
         params = {
             'includeIngredients': ingredient,
             'number': 5,  # Number of recipes to fetch
+            'ranking':1,
             'addRecipeInformation': True,  # Include detailed recipe information
             'includeNutrition': True,  # Ensure nutrition data is included
             'apiKey': API_KEY
@@ -69,3 +70,41 @@ def get_recipe_info(recipe_id):
     else:
         print(f"Failed to fetch recipe info for recipe ID {recipe_id}. Status code: {response.status_code}")
         return None
+
+def new_get_recipes(ingredients):
+    params = {
+        'ingredients': ','.join(ingredients),
+        'number': 5,
+        'ranking': 1,
+        'apiKey': API_KEY
+    }
+    response = requests.get(FIND_BY_INGREDIENTS_URL, params=params)
+    if response.status_code != 200:
+        print("Error fetching recipes:", response.text)
+        return []  # Return empty list or handle error as needed
+
+    recipes = response.json()
+
+    detailed_recipes = []
+    for recipe in recipes:
+        if 'title' not in recipe or 'id' not in recipe:
+            print("Missing required data in recipe:", recipe)
+            continue  # Skip this recipe
+
+        title = recipe['title']
+        url = f"https://spoonacular.com/recipes/{title.replace(' ', '-').lower()}-{recipe['id']}"
+        used_ingredients = [ing['name'] for ing in recipe.get('usedIngredients', [])]
+        missed_ingredients = [ing['name'] for ing in recipe.get('missedIngredients', [])]
+        detailed_recipes.append({
+            'title': title,
+            'url': url,
+            'used_ingredients': used_ingredients,
+            'missed_ingredients': missed_ingredients
+        })
+
+        db_recipe_id = db.add_recipe(title, url)
+        for ingredient in used_ingredients + missed_ingredients:
+            ingredient_id = db.add_ingredient(ingredient)
+            db.add_recipe_ingred(db_recipe_id, ingredient_id)
+
+    return detailed_recipes

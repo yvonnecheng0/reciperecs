@@ -54,8 +54,9 @@
             <li>
                 <strong>{{ recipe.title }}</strong> - 
                 <a href="{{ recipe.url }}" target="_blank">View Recipe</a>
+                <em>Used Ingredients:</em> {{ recipe.used_ingredients | join(', ') }}
                 <br>
-                <em>Ingredients:</em> {{ recipe.ingredients | join(', ') }}
+                <em>Missed Ingredients:</em> {{ recipe.missed_ingredients | join(', ') }}
             </li>
         {% endfor %}
     </ul>
