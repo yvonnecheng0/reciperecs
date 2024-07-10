@@ -11,6 +11,18 @@
             padding: 20px;
             background-color: #f4f4f4;
         }
+        nav {
+            background-color: #4CAF50;
+            padding: 10px;
+        }
+        nav a {
+            color: white;
+            margin-right: 15px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
         h1 {
             color: #333;
         }
@@ -31,6 +43,11 @@
     </style>
 </head>
 <body>
+    <nav>
+        <a href="/">Home</a> |
+        <a href="/history">History</a> |
+        <a href="/nutrition">Nutrition</a>
+    </nav>
     <h1>Recipe Suggestions</h1>
     <ul>
         {% for recipe in recipes %}
@@ -42,7 +59,6 @@
             </li>
         {% endfor %}
     </ul>
-    <a href="/history">View Recipe History</a>
     <a href="/">Go Back</a>
 </body>
 </html>

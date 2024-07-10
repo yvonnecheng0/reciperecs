@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Nutrition Information</title>
+    <style>
+        /* Your CSS styles here */
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a> |
+        <a href="/history">History</a> |
+        <a href="/nutrition">Nutrition</a>
+    </nav>
+    <h1>Recipe Nutrition Information</h1>
+    <ul>
+        {% for recipe in recipes %}
+            <li>
+                <strong>{{ recipe.title }}</strong> - 
+                <a href="{{ recipe.url }}" target="_blank">View Recipe</a>
+                <br>
+                <em>Ingredients:</em> {{ recipe.ingredients | join(', ') }}
+                <br>
+                <em>Nutrition:</em>
+                <ul>
+                    <li>Calories: {{ recipe.nutrition.calories }}</li>
+                    <li>Carbohydrates: {{ recipe.nutrition.carbs }}</li>
+                    <li>Fat: {{ recipe.nutrition.fat }}</li>
+                    <li>Protein: {{ recipe.nutrition.protein }}</li>
+                    <!-- Add more nutrition information as needed -->
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Go Back</a>
+</body>
+</html>
