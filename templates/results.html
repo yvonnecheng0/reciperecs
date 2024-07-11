@@ -28,6 +28,17 @@
         a:hover {
             text-decoration: underline;
         }
+        .link-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #5bc0de;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .link-button:hover {
+            background-color: #31b0d5;
+        }
     </style>
 </head>
 <body>
@@ -38,13 +49,31 @@
                 <strong>{{ recipe.title }}</strong> - 
                 <a href="{{ recipe.url }}" target="_blank">View Recipe</a>
                 <br>
-                <em>Ingredients:</em> {{ recipe.ingredients | join(', ') }}
+                <em>Used Ingredients:</em> {{ recipe.used_ingredients | join(', ') }}
+                <br>
+                <em>Missed Ingredients:</em> {{ recipe.missed_ingredients | join(', ') }}
             </li>
         {% endfor %}
     </ul>
-    <a href="/">Go Back</a>
+    <a href="/" class="link-button">Go Back</a>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,46 +1,40 @@
 import requests
 import db
 
-API_KEY = 'ab4412b72bb448f28ac243f5210c8e84'
-SEARCH_URL = 'https://api.spoonacular.com/recipes/complexSearch'
-RECIPE_INFO_URL = 'https://api.spoonacular.com/recipes/{id}/information'
+API_KEY = '4ca9539291f24558895a256986aadede'
+FIND_BY_INGREDIENTS_URL = 'https://api.spoonacular.com/recipes/findByIngredients'
 
-#Get recipes from Spoonacular API based on input 
-#Input: list of ingredients 
-#Output: list of 5 recipes matching ingredients
+
 def get_recipes(ingredients):
     params = {
-        'includeIngredients': ','.join(ingredients),
+        'ingredients': ','.join(ingredients),
         'number': 5,
-        'addRecipeInformation': True,
+        'ranking': 1,
         'apiKey': API_KEY
     }
-    response = requests.get(SEARCH_URL, params=params)
-    recipes = response.json().get('results', [])
+    response = requests.get(FIND_BY_INGREDIENTS_URL, params=params)
+    recipes = response.json()
     
+    detailed_recipes = []
     for recipe in recipes:
-        if 'id' in recipe:
-            recipe_id = recipe['id']
-            detailed_info = get_recipe_info(recipe_id)
-            if detailed_info:
-                title = detailed_info['title']
-                url = detailed_info['sourceUrl']
-                db_recipe_id = db.add_recipe(title, url)
-                for ingredient in ingredients:
-                    ingredient_id = db.add_ingredient(ingredient)
-                    db.add_recipe_ingredient(db_recipe_id, ingredient_id)
+        title = recipe['title']
+        url = f"https://spoonacular.com/recipes/{recipe['title'].replace(' ', '-').lower()}-{recipe['id']}"
+        used_ingredients = [ing['name'] for ing in recipe.get('usedIngredients', [])]
+        missed_ingredients = [ing['name'] for ing in recipe.get('missedIngredients', [])]
+        detailed_recipes.append({
+            'title': title,
+            'url': url,
+            'used_ingredients': used_ingredients,
+            'missed_ingredients': missed_ingredients
+        })
+        db_recipe_id = db.add_recipe(title, url)
+        for ingredient in used_ingredients + missed_ingredients:
+            ingredient_id = db.add_ingredient(ingredient)
+            db.add_recipe_ingredient(db_recipe_id, ingredient_id)
     
-    return recipes
+    return detailed_recipes
 
-#Get recipe information from Spoonacular API
-#Input: id of recipe
-#Output is detailed information about the recipe
-def get_recipe_info(recipe_id):
-    url = RECIPE_INFO_URL.format(id=recipe_id)
-    params = {
-        'apiKey': API_KEY
-    }
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        return response.json()
-    return None
+
+
+
+

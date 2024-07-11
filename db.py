@@ -33,40 +33,44 @@ def create_database():
     conn.commit()
     conn.close()
 
-#Add one ingredient to ingredients table or retrieve its ID if it exists
 def add_ingredient(name):
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-    c.execute('INSERT OR IGNORE INTO ingredients (name) VALUES (?)', (name,))
     c.execute('SELECT id FROM ingredients WHERE name = ?', (name,))
-    ingredient_id = c.fetchone()[0]
+    row = c.fetchone()
+    if row:
+        ingredient_id = row[0]
+    else:
+        c.execute('INSERT INTO ingredients (name) VALUES (?)', (name,))
+        ingredient_id = c.lastrowid
     conn.commit()
     conn.close()
     return ingredient_id
 
-#Add one recipe to the recipes table or retrieve its ID if it exists
 def add_recipe(title, url):
-    """
-    Add a single recipe to the recipes table or retrieve its ID if it exists.
-    """
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-    c.execute('INSERT OR IGNORE INTO recipes (title, url) VALUES (?, ?)', (title, url))
     c.execute('SELECT id FROM recipes WHERE title = ? AND url = ?', (title, url))
-    recipe_id = c.fetchone()[0]
+    row = c.fetchone()
+    if row:
+        recipe_id = row[0]
+    else:
+        c.execute('INSERT INTO recipes (title, url) VALUES (?, ?)', (title, url))
+        recipe_id = c.lastrowid
     conn.commit()
     conn.close()
     return recipe_id
 
-#Associate an ingredient with a recipe in the recipe_ingredients table
 def add_recipe_ingredient(recipe_id, ingredient_id):
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
-    c.execute('INSERT OR IGNORE INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (?, ?)', (recipe_id, ingredient_id))
+    c.execute('SELECT * FROM recipe_ingredients WHERE recipe_id = ? AND ingredient_id = ?', (recipe_id, ingredient_id))
+    row = c.fetchone()
+    if not row:
+        c.execute('INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (?, ?)', (recipe_id, ingredient_id))
     conn.commit()
     conn.close()
 
-#Get all ingredients from the ingredients table
 def get_ingredients():
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
@@ -75,8 +79,19 @@ def get_ingredients():
     conn.close()
     return ingredients
 
-#Get all recipes along with their associated ingredients
-def get_recipes_with_ingredients():
+def get_used_ingredients():
+    conn = sqlite3.connect('recipes.db')
+    c = conn.cursor()
+    c.execute('''
+        SELECT DISTINCT ingredients.name
+        FROM ingredients
+        JOIN recipe_ingredients ON ingredients.id = recipe_ingredients.ingredient_id
+    ''')
+    used_ingredients = [row[0] for row in c.fetchall()]
+    conn.close()
+    return used_ingredients
+
+def get_recipe_with_ingredients(recipe_id):
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
     c.execute('''
@@ -84,13 +99,14 @@ def get_recipes_with_ingredients():
         FROM recipes
         JOIN recipe_ingredients ON recipes.id = recipe_ingredients.recipe_id
         JOIN ingredients ON recipe_ingredients.ingredient_id = ingredients.id
+        WHERE recipes.id = ?
         GROUP BY recipes.id
-    ''')
-    recipes = [{'title': row[0], 'url': row[1], 'ingredients': row[2].split(',')} for row in c.fetchall()]
+    ''', (recipe_id,))
+    row = c.fetchone()
+    recipe = {'title': row[0], 'url': row[1], 'ingredients': row[2].split(',')}
     conn.close()
-    return recipes
+    return recipe
 
-#Clear all data from database
 def clear_database():
     conn = sqlite3.connect('recipes.db')
     c = conn.cursor()
@@ -100,8 +116,13 @@ def clear_database():
     conn.commit()
     conn.close()
 
-#Initialize database by creating the tables
 create_database()
+
+
+
+
+
+
 
 
 
