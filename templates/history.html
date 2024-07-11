@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333; /* Main text color */
+        }
+        nav {
+            background-color: #4CAF50;
+            padding: 10px;
+            margin-bottom: 20px; /* Space below navigation */
+        }
+        nav a {
+            color: white;
+            margin-right: 15px;
+            text-decoration: none;
+            font-weight: bold; /* Navigation links are bold */
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            color: #333;
+            text-align: center; /* Center align heading */
+            margin-bottom: 30px; /* Space below heading */
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 20px; /* Space between recipe items */
+            padding: 15px;
+            background-color: white; /* White background for recipe items */
+            border-radius: 8px; /* Rounded corners for recipe items */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+            border: 1px solid #ccc; /* Adding a faint border */
+        }
+        a {
+            color: #1e90ff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a> |
+        <a href="/history">History</a> |
+        <a href="/nutrition">Nutrition</a>
+    </nav>
+    <h1>Recipe History</h1>
+    <ul>
+        {% for recipe in recipes %}
+            <li>
+                <strong>{{ recipe.title }}</strong> - 
+                <a href="{{ recipe.url }}" target="_blank">View Recipe</a>
+                <br>
+                <em>Ingredients:</em> {{ recipe.ingredients | join(', ') }}
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Go Back</a>
+</body>
+</html>

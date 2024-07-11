@@ -33,8 +33,3 @@ def get_recipes(ingredients):
             db.add_recipe_ingredient(db_recipe_id, ingredient_id)
     
     return detailed_recipes
-
-
-
-
-
