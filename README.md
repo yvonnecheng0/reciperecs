@@ -24,6 +24,8 @@ helping users reduce food waste and make meal planning easier.
 - Save ingredients to a database
 - Fetch recipes from the Spoonacular API
 - Display top 5 recipe suggestions with links to the full recipes
+- History Page that includes all ingredidents
+- Extensive Nutrition Page
 
 ## Installation
 
